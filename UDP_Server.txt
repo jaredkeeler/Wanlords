@@ -1,0 +1,33 @@
+import socket
+
+s_log = open("UDP_log4server.txt", "w")  #Open .txt
+
+server_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)  #UDP Server 
+
+server_address = ('192.168.1.196', 12349)  #Bind serv address / port
+server_socket.bind(server_address)
+s_log.write("Server is listening on {}:{}\n".format(*server_address))
+s_log.flush()
+
+try:
+    while True:
+        s_log.write("Waiting for a message...\n")
+        s_log.flush()
+
+        data, client_address = server_socket.recvfrom(1024)
+        msg = data.decode()
+
+        s_log.write("Received from {}: {}: {}\n".format(client_address, *msg))
+        s_log.flush()
+
+        ack = "Received your msg: " + msg
+        server_socket.sendto(ack.encode(), client_address)
+
+        s_log.write("Sent to {}: {}\n".format(client_address, ack))
+        s_log.flush()
+
+except KeyboardInterrupt:
+    s_log.write("Ctrl+C was pressed - Ending UDP server\n")
+finally:
+    s_log.flush()
+    s_log.close()
